@@ -12,7 +12,8 @@
  * more details.
  */
 
-#include <linux/nvme.h>
+#include "nvme.h"
+
 #include <linux/bitops.h>
 #include <linux/blkdev.h>
 #include <linux/blk-mq.h>
