@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BASE_FILES="drivers/block/nvme-core.c drivers/block/nvme-scsi.c"
+BASE_FILES="include/linux/nvme.h drivers/block/nvme-core.c drivers/block/nvme-scsi.c"
 BASE_DIR="`dirname \`readlink -e $0\``"
 
 SRPM="$1"
