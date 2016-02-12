@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BASE_FILES="include/linux/nvme.h drivers/block/nvme-core.c drivers/block/nvme-scsi.c"
-BASE_DIR="`dirname \`readlink -e $0\``"
+BASE_DIR="`dirname \`readlink -e $0\``/base"
 
 SRPM="$1"
 if [ -z "$SRPM" -o $# -ne 1 ]; then
@@ -39,10 +39,10 @@ do
     cp -f $BASE_DIR/`basename $x` $TEMP_DIR/old
     cp -f $BASE_DIR/`basename $x` $TEMP_DIR/old/base
 done
-cp -f $BASE_DIR/base/VERSION $TEMP_DIR/old/base
+cp -f $BASE_DIR/VERSION $TEMP_DIR/old/base
 
 # extract kernel source and picks up the original files
-pushd $TEMP_DIR/source
+pushd $TEMP_DIR/source >/dev/null
 rpm2cpio $SRPM_BASE | cpio -idu || exit 1
 if [ ! -r linux-${SRPM_VERSION}-${SRPM_RELEASE}.tar.xz ]; then
     echo "Error: linux-${SRPM_VERSION}-${SRPM_RELEASE}.tar.xz not found in $SRPM"
@@ -59,16 +59,18 @@ do
     cp -f linux-${SRPM_VERSION}-${SRPM_RELEASE}/$x $TEMP_DIR/new
     cp -f linux-${SRPM_VERSION}-${SRPM_RELEASE}/$x $TEMP_DIR/new/base
 done
-echo "${SRPM_VERSION}-${SRPM_RELEASE}" > $TEMP_DIR/new/VERSION
+echo "${SRPM_VERSION}-${SRPM_RELEASE}" > $TEMP_DIR/new/base/VERSION
 cd ..
 
 # make a patch to upgrade the base version
-diff -up old new > $TEMP_DIR/nvme-strom.upgrade.diff
-popd
+diff -rup old new > $TEMP_DIR/nvme-strom.upgrade.diff
+popd >/dev/null
 
 if [ -s "$TEMP_DIR/nvme-strom.upgrade.diff" ]; then
     cp $TEMP_DIR/nvme-strom.upgrade.diff ./
     echo "Info: nvme-strom.upgrade.diff is generated"
+    echo "------------------------------------------"
+    cat ./nvme-strom.upgrade.diff
 else
     echo "Info: we have no difference in this upgrade"
     echo "      No patch shall be generated"
